@@ -93,3 +93,103 @@ curl -X POST http://localhost:3000/user/register \
 - The password is securely hashed before storage.
 - The email must be unique.
 - The JWT token can be used for authenticated requests.
+
+---
+
+# User Login API Documentation
+
+## Endpoint
+
+`POST /user/login`
+
+## Description
+
+This endpoint allows an existing user to log in using their email and password. On successful authentication, it returns a JWT token and the user object.
+
+---
+
+## Request Body
+
+Send a JSON object with the following structure:
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "yourpassword"
+}
+```
+
+### Field Requirements
+
+- `email` (string, required): Must be a valid email address.
+- `password` (string, required): Minimum 6 characters.
+
+---
+
+## Responses
+
+### Success
+
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "token": "<jwt_token>",
+    "user": {
+      "_id": "user_id",
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "john.doe@example.com",
+      "socketId": null
+    }
+  }
+  ```
+
+### Validation Error
+
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "errors": [
+      {
+        "msg": "invalid Email",
+        "param": "email",
+        "location": "body"
+      }
+      // ...other errors
+    ]
+  }
+  ```
+
+### Authentication Error
+
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "invalid email or password"
+  }
+  ```
+
+---
+
+## Example Request
+
+```bash
+curl -X POST http://localhost:3000/user/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "yourpassword"
+  }'
+```
+
+---
+
+## Notes
+
+- The JWT token can be used for authenticated requests.
+- Ensure the email and password are correct to receive a valid token.
