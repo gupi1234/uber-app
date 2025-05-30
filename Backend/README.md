@@ -196,7 +196,7 @@ curl -X POST http://localhost:3000/user/login \
 
 ---
 
-# User Profile API Documentation 
+# User Profile API Documentation
 
 ## Endpoint
 
@@ -209,6 +209,7 @@ This endpoint returns the profile information of the authenticated user.
 ## Authentication
 
 Requires a valid JWT token in the Authorization header:
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -263,6 +264,7 @@ This endpoint logs out the current user by clearing their authentication cookie 
 ## Authentication
 
 Requires a valid JWT token in the Authorization header:
+
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -300,3 +302,132 @@ curl -X GET http://localhost:3000/user/logout \
 
 - The JWT token will be blacklisted and can't be used for future requests
 - The authentication cookie will be cleared from the client
+
+---
+
+# Captain Registration API Documentation
+
+## Endpoint
+
+`POST /captain/register`
+
+## Description
+
+This endpoint allows a new captain to register by providing their full name, email, password, and vehicle details. On successful registration, the endpoint returns a JWT token and the created captain object.
+
+---
+
+## Request Body
+
+Send a JSON object with the following structure:
+
+```json
+{
+  "fullname": {
+    "firstname": "Jane",
+    "lastname": "Smith"
+  },
+  "email": "jane.smith@example.com",
+  "password": "yourpassword",
+  "vehicle": {
+    "color": "Red",
+    "plate": "XYZ123",
+    "capacity": 4,
+    "vehicleType": "Sedan"
+  }
+}
+```
+
+### Field Requirements
+
+- `fullname.firstname` (string, required): Minimum 3 characters.
+- `fullname.lastname` (string, optional).
+- `email` (string, required): Must be a valid email address.
+- `password` (string, required): Minimum 6 characters.
+- `vehicle.color` (string, required): Minimum 3 characters.
+- `vehicle.plate` (string, required): Minimum 3 characters.
+- `vehicle.capacity` (number, required): Must be provided.
+- `vehicle.vehicleType` (string, required): Must be provided.
+
+---
+
+## Responses
+
+### Success
+
+- **Status Code:** `201 Created`
+- **Body:**
+  ```json
+  {
+    "token": "<jwt_token>",
+    "captain": {
+      "_id": "captain_id",
+      "fullname": {
+        "firstname": "Jane",
+        "lastname": "Smith"
+      },
+      "email": "jane.smith@example.com",
+      "vehicle": {
+        "color": "Red",
+        "plate": "XYZ123",
+        "capacity": 4,
+        "vehicleType": "Sedan"
+      }
+    }
+  }
+  ```
+
+### Validation Error
+
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "errors": [
+      {
+        "msg": "firstname must be al least 3 charactors long",
+        "param": "fullname.firstname",
+        "location": "body"
+      }
+      // ...other errors
+    ]
+  }
+  ```
+
+### Duplicate Email Error
+
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "message": "Captain already exists"
+  }
+  ```
+
+---
+
+## Example Request
+
+```bash
+curl -X POST http://localhost:3000/captain/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullname": { "firstname": "Jane", "lastname": "Smith" },
+    "email": "jane.smith@example.com",
+    "password": "yourpassword",
+    "vehicle": {
+      "color": "Red",
+      "plate": "XYZ123",
+      "capacity": 4,
+      "vehicleType": "Sedan"
+    }
+  }'
+```
+
+---
+
+## Notes
+
+- The password is securely hashed before storage.
+- The email must be unique.
+- The JWT token can be used for authenticated requests.
