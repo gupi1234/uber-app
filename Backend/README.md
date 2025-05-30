@@ -305,21 +305,21 @@ curl -X GET http://localhost:3000/user/logout \
 
 ---
 
-# Captain Registration API Documentation
-
-## Endpoint
-
-`POST /captain/register`
-
-## Description
-
-This endpoint allows a new captain to register by providing their full name, email, password, and vehicle details. On successful registration, the endpoint returns a JWT token and the created captain object.
+# Captain API Documentation
 
 ---
 
-## Request Body
+## Captain Registration
 
-Send a JSON object with the following structure:
+### Endpoint
+
+`POST /captain/register`
+
+### Description
+
+Register a new captain by providing full name, email, password, and vehicle details. Returns a JWT token and the created captain object.
+
+### Request Body
 
 ```json
 {
@@ -333,12 +333,12 @@ Send a JSON object with the following structure:
     "color": "Red",
     "plate": "XYZ123",
     "capacity": 4,
-    "vehicleType": "Sedan"
+    "vehicleType": "car"
   }
 }
 ```
 
-### Field Requirements
+#### Field Requirements
 
 - `fullname.firstname` (string, required): Minimum 3 characters.
 - `fullname.lastname` (string, optional).
@@ -346,14 +346,12 @@ Send a JSON object with the following structure:
 - `password` (string, required): Minimum 6 characters.
 - `vehicle.color` (string, required): Minimum 3 characters.
 - `vehicle.plate` (string, required): Minimum 3 characters.
-- `vehicle.capacity` (number, required): Must be provided.
-- `vehicle.vehicleType` (string, required): Must be provided.
+- `vehicle.capacity` (number, required).
+- `vehicle.vehicleType` (string, required).
 
----
+### Responses
 
-## Responses
-
-### Success
+#### Success
 
 - **Status Code:** `201 Created`
 - **Body:**
@@ -371,13 +369,13 @@ Send a JSON object with the following structure:
         "color": "Red",
         "plate": "XYZ123",
         "capacity": 4,
-        "vehicleType": "Sedan"
+        "vehicleType": "car"
       }
     }
   }
   ```
 
-### Validation Error
+#### Validation Error
 
 - **Status Code:** `400 Bad Request`
 - **Body:**
@@ -394,7 +392,7 @@ Send a JSON object with the following structure:
   }
   ```
 
-### Duplicate Email Error
+#### Duplicate Email Error
 
 - **Status Code:** `400 Bad Request`
 - **Body:**
@@ -404,9 +402,7 @@ Send a JSON object with the following structure:
   }
   ```
 
----
-
-## Example Request
+### Example Request
 
 ```bash
 curl -X POST http://localhost:3000/captain/register \
@@ -419,9 +415,210 @@ curl -X POST http://localhost:3000/captain/register \
       "color": "Red",
       "plate": "XYZ123",
       "capacity": 4,
-      "vehicleType": "Sedan"
+      "vehicleType": "car"
     }
   }'
+```
+
+---
+
+## Captain Login
+
+### Endpoint
+
+`POST /captain/login`
+
+### Description
+
+Authenticate a captain using email and password. Returns a JWT token and the captain object.
+
+### Request Body
+
+```json
+{
+  "email": "jane.smith@example.com",
+  "password": "yourpassword"
+}
+```
+
+#### Field Requirements
+
+- `email` (string, required): Must be a valid email address.
+- `password` (string, required): Minimum 6 characters.
+
+### Responses
+
+#### Success
+
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "token": "<jwt_token>",
+    "captain": {
+      "_id": "captain_id",
+      "fullname": {
+        "firstname": "Jane",
+        "lastname": "Smith"
+      },
+      "email": "jane.smith@example.com",
+      "vehicle": {
+        "color": "Red",
+        "plate": "XYZ123",
+        "capacity": 4,
+        "vehicleType": "car"
+      }
+    }
+  }
+  ```
+
+#### Validation Error
+
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "errors": [
+      {
+        "msg": "Invalid email",
+        "param": "email",
+        "location": "body"
+      }
+      // ...other errors
+    ]
+  }
+  ```
+
+#### Authentication Error
+
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "Invalid Email Or Password"
+  }
+  ```
+
+### Example Request
+
+```bash
+curl -X POST http://localhost:3000/captain/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane.smith@example.com",
+    "password": "yourpassword"
+  }'
+```
+
+---
+
+## Captain Profile
+
+### Endpoint
+
+`GET /captain/profile`
+
+### Description
+
+Returns the profile information of the authenticated captain.
+
+### Authentication
+
+Requires a valid JWT token in the Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Responses
+
+#### Success
+
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "captain": {
+      "_id": "captain_id",
+      "fullname": {
+        "firstname": "Jane",
+        "lastname": "Smith"
+      },
+      "email": "jane.smith@example.com",
+      "vehicle": {
+        "color": "Red",
+        "plate": "XYZ123",
+        "capacity": 4,
+        "vehicleType": "car"
+      }
+    }
+  }
+  ```
+
+#### Authentication Error
+
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "Unauthorized"
+  }
+  ```
+
+### Example Request
+
+```bash
+curl -X GET http://localhost:3000/captain/profile \
+  -H "Authorization: Bearer <jwt_token>"
+```
+
+---
+
+## Captain Logout
+
+### Endpoint
+
+`GET /captain/logout`
+
+### Description
+
+Logs out the current captain by blacklisting the current JWT token and clearing the authentication cookie.
+
+### Authentication
+
+Requires a valid JWT token in the Authorization header:
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Responses
+
+#### Success
+
+- **Status Code:** `200 OK`
+- **Body:**
+  ```json
+  {
+    "message": "Logged out successfully"
+  }
+  ```
+
+#### Authentication Error
+
+- **Status Code:** `401 Unauthorized`
+- **Body:**
+  ```json
+  {
+    "message": "Unauthorized"
+  }
+  ```
+
+### Example Request
+
+```bash
+curl -X GET http://localhost:3000/captain/logout \
+  -H "Authorization: Bearer <jwt_token>"
 ```
 
 ---
@@ -431,3 +628,4 @@ curl -X POST http://localhost:3000/captain/register \
 - The password is securely hashed before storage.
 - The email must be unique.
 - The JWT token can be used for authenticated requests.
+- On logout, the JWT token is blacklisted and cannot be used again.

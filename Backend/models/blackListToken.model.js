@@ -5,4 +5,8 @@ const blackListTokenSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, expires: 60 * 60 * 24 },
 });
 
-module.exports = mongoose.model("BlackListToken", blackListTokenSchema);
+const BlackListToken =
+  mongoose.models.BlackListToken ||
+  mongoose.model("BlackListToken", blackListTokenSchema);
+
+module.exports = BlackListToken;
