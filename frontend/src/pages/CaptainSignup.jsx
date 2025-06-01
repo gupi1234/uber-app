@@ -1,28 +1,61 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import { CaptainDataContext } from "../context/CaptainContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const CaptainSignup = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [userData, setUserData] = useState({});
 
-  const submitHandler = (e) => {
+  const [vehicleColor, setVehicleColor] = useState("");
+  const [vehiclePlate, setVehiclePlate] = useState("");
+  const [vehicleCapacity, setVehicleCapacity] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+
+  const submitHandler = async (e) => {
     e.preventDefault();
-    setUserData({
-      fullName: {
-        firstName: firstName,
-        lastName: lastName,
+    const captainData = {
+      fullname: {
+        firstname: firstName,
+        lastname: lastName,
       },
       email: email,
       password: password,
-    });
-    console.log(userData);
+      vehicle: {
+        color: vehicleColor,
+        plate: vehiclePlate,
+        capacity: vehicleCapacity,
+        vehicleType: vehicleType,
+      },
+    };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/captains/register`,
+      captainData
+    );
+
+    if (response.status === 201) {
+      const data = response.data;
+      setCaptain(data);
+      localStorage.setItem("token", data.token);
+      navigate("/captain-home");
+    }
+
     setEmail("");
     setPassword("");
     setFirstName("");
     setLastName("");
+    setVehicleColor("");
+    setVehiclePlate("");
+    setVehicleCapacity("");
+    setVehicleType("");
   };
 
   return (
@@ -81,7 +114,7 @@ const CaptainSignup = () => {
           {/* Password */}
           <div>
             <label className="text-lg font-medium text-gray-800 block mb-2">
-              Enter Password
+              Password
             </label>
             <input
               required
@@ -93,7 +126,56 @@ const CaptainSignup = () => {
               className="bg-white mb-6 rounded-lg p-3 w-full border border-gray-300 text-base placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
           </div>
+          <div className="space-y-4 ">
+            {/* Vehicle Data Inputs */}
+            <label className="text-lg font-medium text-gray-800 block mb-2">
+              Vehicle Details
+            </label>
+            <div className="flex  gap-3">
+              <input
+                required
+                type="text"
+                value={vehicleColor}
+                onChange={(e) => setVehicleColor(e.target.value)}
+                placeholder="Vehicle color"
+                className="w-full p-3 rounded-md border border-gray-300 bg-gray-50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              />
 
+              {/* Vehicle type options are already provided above as "car", "auto", and "moto" in the select input. No additional code needed here. */}
+
+              <input
+                required
+                type="text"
+                value={vehiclePlate}
+                onChange={(e) => setVehiclePlate(e.target.value)}
+                placeholder="Plate number"
+                className="w-full p-3 rounded-md border border-gray-300 bg-gray-50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              />
+            </div>
+            <input
+              required
+              type="number"
+              min="1"
+              value={vehicleCapacity}
+              onChange={(e) => setVehicleCapacity(e.target.value)}
+              placeholder="Capacity"
+              className="w-full p-3 rounded-md border border-gray-300 bg-gray-50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+
+            <select
+              required
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+              className="w-full p-3 rounded-md border border-gray-300 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            >
+              <option value="" disabled>
+                Select vehicle type
+              </option>
+              <option value="car">Car</option>
+              <option value="auto">Auto</option>
+              <option value="moto">Moto</option>
+            </select>
+          </div>
           {/* Submit Button */}
           <button
             type="submit"
@@ -111,7 +193,7 @@ const CaptainSignup = () => {
               focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2
             "
           >
-            Sign up
+            Create Captain Account
           </button>
         </form>
 
